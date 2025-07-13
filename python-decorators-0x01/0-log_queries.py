@@ -5,7 +5,7 @@ def log_queries(func):
     """Decorator to log SQL query before execution"""
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        query = kwargs.get('query') or (args[0] if args else None)
+        query = kwargs.get('query') if 'query' in kwargs else args[0] if args else None
         if query:
             print(f"Executing SQL Query: {query}")
         return func(*args, **kwargs)
@@ -20,9 +20,7 @@ def fetch_all_users(query):
     conn.close()
     return results
 
-# Example usage
+# Fetch users while logging the query
 users = fetch_all_users(query="SELECT * FROM users")
 print(users)
-
- 
 
