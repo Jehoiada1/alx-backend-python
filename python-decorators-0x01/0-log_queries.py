@@ -31,3 +31,4 @@ def get_user_by_id(conn, user_id):
 # Example usage
 user = get_user_by_id(user_id=1)
 print(user)
+
