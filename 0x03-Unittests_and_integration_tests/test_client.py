@@ -10,24 +10,16 @@ class TestGithubOrgClient(unittest.TestCase):
     """Test cases for GithubOrgClient"""
 
     @parameterized.expand([
-        ("google",),
-        ("abc",),
+        ("google", {"login": "google", "id": 123456}),
+        ("abc", {"login": "abc", "id": 789012}),
     ])
-    @patch('client.get_json')
-    def test_org(self, org_name, mock_get_json):
+    @patch('client.GithubOrgClient._org', new_callable=PropertyMock)
+    def test_org(self, org_name, expected_response, mock_org):
         """Test that GithubOrgClient.org returns correct value"""
-        # Setup mock return value
-        expected_response = {"login": org_name, "id": 123456}
-        mock_get_json.return_value = expected_response
+        # Set the mock return value
+        mock_org.return_value = expected_response
 
         # Create client instance and call org property
         client = GithubOrgClient(org_name)
-        result = client.org
-
-        # Assert get_json was called once with correct URL
-        mock_get_json.assert_called_once_with(
-            f"https://api.github.com/orgs/{org_name}"
-        )
-        
-        # Assert the result matches expected response
-        self.assertEqual(result, expected_response)
+        self.assertEqual(client.org, expected_response)
+        mock_org.assert_called_once()
