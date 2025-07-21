@@ -35,7 +35,9 @@ class TestGithubOrgClient(unittest.TestCase):
         with patch(
             'client.GithubOrgClient.org',
             new_callable=PropertyMock,
-            return_value={"repos_url": "https://api.github.com/orgs/test/repos"}
+            return_value={
+                "repos_url": "https://api.github.com/orgs/test/repos"
+            }
         ):
             client = GithubOrgClient("test")
             self.assertEqual(
