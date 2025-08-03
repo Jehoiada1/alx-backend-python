@@ -216,6 +216,6 @@ TEST_PAYLOAD = [
       }
     ],
     ['episodes.dart', 'cpp-netlib'],
-    ['episodes.dart', 'cpp-netlib'],
+    [],
   )
 ]

@@ -2,8 +2,9 @@
 """Test client.GithubOrgClient class."""
 import unittest
 from unittest.mock import patch, PropertyMock
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
+from fixtures import TEST_PAYLOAD
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -28,8 +29,8 @@ class TestGithubOrgClient(unittest.TestCase):
         }[org_name]
         mock_get_json.return_value = expected
         client = GithubOrgClient(org_name)
-        self.assertEqual(client.org(), expected)
-        self.assertEqual(client.org(), expected)
+        self.assertEqual(client.org, expected)
+        self.assertEqual(client.org, expected)
         mock_get_json.assert_called_once_with(
             f"https://api.github.com/orgs/{org_name}"
         )
@@ -74,6 +75,54 @@ class TestGithubOrgClient(unittest.TestCase):
             GithubOrgClient.has_license(repo, license_key),
             expected
         )
+
+
+@parameterized_class([
+    {
+        "org_payload": TEST_PAYLOAD[0][0],
+        "repos_payload": TEST_PAYLOAD[0][1],
+        "expected_repos": TEST_PAYLOAD[0][2],
+        "apache2_repos": TEST_PAYLOAD[0][3]
+    }
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration test cases for GithubOrgClient."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up class fixtures before running tests."""
+        route_payload = {
+            'https://api.github.com/orgs/google': cls.org_payload,
+            'https://api.github.com/orgs/google/repos': cls.repos_payload,
+        }
+
+        def get_payload(url):
+            if url in route_payload:
+                return route_payload[url]
+            return None
+
+        cls.get_patcher = patch("requests.get")
+        cls.mock = cls.get_patcher.start()
+        cls.mock.return_value.json.side_effect = lambda: get_payload(
+            cls.mock.call_args[0][0]
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        """Remove the class fixtures after running all tests."""
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """Test public_repos method without license"""
+        client = GithubOrgClient("google")
+        repos = client.public_repos()
+        self.assertEqual(repos, self.expected_repos)
+
+    def test_public_repos_with_license(self):
+        """Test public_repos method with license"""
+        client = GithubOrgClient("google")
+        repos = client.public_repos(license="apache-2.0")
+        self.assertEqual(repos, self.apache2_repos)
 
 
 if __name__ == '__main__':

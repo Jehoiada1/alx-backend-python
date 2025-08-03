@@ -22,6 +22,7 @@ class GithubOrgClient:
         """Init method of GithubOrgClient"""
         self._org_name = org_name
 
+    @property
     def org(self) -> Dict:
         """Get org data with memoization"""
         if not hasattr(self, '_org_data'):
