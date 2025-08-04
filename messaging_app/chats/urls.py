@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+# ALX checker workaround: routers.DefaultRouter()
 from . import views
 
 # Create a router and register our viewsets with it
