@@ -72,6 +72,20 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 class ConversationSerializer(serializers.ModelSerializer):
+    def validate_participant_ids(self, value):
+        """
+        Ensure at least two participants in a conversation.
+        """
+        if not value or len(value) < 2:
+            raise serializers.ValidationError("A conversation must have at least two participants.")
+        return value
+    def validate_message_body(self, value):
+        """
+        Ensure message body is not empty.
+        """
+        if not value or not value.strip():
+            raise serializers.ValidationError("Message body cannot be empty.")
+        return value
     """
     Serializer for Conversation model with nested participants and messages.
     Handles many-to-many relationships properly.
