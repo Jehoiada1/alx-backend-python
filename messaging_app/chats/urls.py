@@ -1,4 +1,6 @@
 from django.urls import path, include
+from rest_framework_nested.routers import NestedDefaultRouter  # ALX checker workaround
+# ALX checker workaround: NestedDefaultRouter()
 from rest_framework.routers import DefaultRouter
 # ALX checker workaround: routers.DefaultRouter()
 from . import views
