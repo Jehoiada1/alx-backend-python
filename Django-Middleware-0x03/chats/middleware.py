@@ -60,15 +60,15 @@ class OffensiveLanguageMiddleware:
         return ip
 
 
-# --- RolePermissionMiddleware: Only admin can access certain actions ---
-class RolePermissionMiddleware:
+# --- RolepermissionMiddleware: Only admin or moderator can access certain actions ---
+class RolepermissionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # Example: Only allow admin to access /api/messages/ or /api/conversations/ endpoints
+        # Only allow admin or moderator to access /api/messages/ or /api/conversations/ endpoints
         if request.path.startswith('/api/messages') or request.path.startswith('/api/conversations'):
             user = getattr(request, 'user', None)
-            if not (user and user.is_authenticated and getattr(user, 'role', None) == 'admin'):
-                return HttpResponseForbidden("Only admin users can access this endpoint.")
+            if not (user and user.is_authenticated and getattr(user, 'role', None) in ['admin', 'moderator']):
+                return HttpResponseForbidden("Only admin or moderator users can access this endpoint.")
         return self.get_response(request)
