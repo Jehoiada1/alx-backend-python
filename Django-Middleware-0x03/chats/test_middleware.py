@@ -70,8 +70,8 @@ class MiddlewareTest(TestCase):
         self.assertIsInstance(result, HttpResponseForbidden)
 
     def test_role_permission_middleware_admin(self):
-        from .middleware import RolePermissionMiddleware
-        middleware = RolePermissionMiddleware(lambda req: 'ok')
+        from .middleware import RolepermissionMiddleware
+        middleware = RolepermissionMiddleware(lambda req: 'ok')
         request = self.factory.get('/api/messages')
         request.user = self.user
         self.user.role = 'admin'
@@ -80,8 +80,8 @@ class MiddlewareTest(TestCase):
         self.assertEqual(result, 'ok')
 
     def test_role_permission_middleware_non_admin(self):
-        from .middleware import RolePermissionMiddleware
-        middleware = RolePermissionMiddleware(lambda req: 'ok')
+        from .middleware import RolepermissionMiddleware
+        middleware = RolepermissionMiddleware(lambda req: 'ok')
         request = self.factory.get('/api/messages')
         request.user = self.user
         self.user.role = 'guest'

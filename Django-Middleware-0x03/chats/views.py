@@ -49,7 +49,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     Provides CRUD operations and custom actions for Conversation model.
     """
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    permission_classes = [IsParticipantOfConversation]
     lookup_field = 'conversation_id'
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['participants__email', 'participants__first_name', 'participants__last_name']
@@ -57,10 +57,13 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Return conversations where the current user is a participant.
+        Return conversations where the current user is a participant, or all if admin.
         """
+        user = self.request.user
+        if hasattr(user, 'role') and user.role == 'admin':
+            return Conversation.objects.all().distinct().prefetch_related('participants', 'messages')
         return Conversation.objects.filter(
-            participants=self.request.user
+            participants=user
         ).distinct().prefetch_related('participants', 'messages')
 
     def get_serializer_class(self):

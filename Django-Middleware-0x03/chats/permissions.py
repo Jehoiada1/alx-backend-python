@@ -7,12 +7,23 @@ class IsParticipantOfConversation(BasePermission):
     def has_object_permission(self, request, view, obj):
         # obj is a Conversation or Message
         user = request.user
+        print(f"DEBUG: Checking permission for user {user} on obj {obj}")
         if not user.is_authenticated:
+            print("DEBUG: User not authenticated")
             return False
         if hasattr(obj, 'participants'):
-            return user in obj.participants.all()
+            participant_ids = [u.pk for u in obj.participants.all()]
+            print(f"DEBUG: obj.participants IDs = {participant_ids}, user.pk = {user.pk}")
+            result = user.pk in participant_ids
+            print(f"DEBUG: user.pk in obj.participants IDs = {result}")
+            return result
         if hasattr(obj, 'conversation'):
-            return user in obj.conversation.participants.all()
+            participant_ids = [u.pk for u in obj.conversation.participants.all()]
+            print(f"DEBUG: obj.conversation.participants IDs = {participant_ids}, user.pk = {user.pk}")
+            result = user.pk in participant_ids
+            print(f"DEBUG: user.pk in obj.conversation.participants IDs = {result}")
+            return result
+        print("DEBUG: No participants or conversation attribute found")
         return False
 
     def has_permission(self, request, view):
