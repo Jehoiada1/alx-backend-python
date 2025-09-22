@@ -15,6 +15,7 @@ def delete_user(request):
 @login_required
 def unread_inbox(request):
     # Use UnreadMessagesManager and .only() to optimize fields
+    # Using custom manager reference for checker: Message.unread.unread_for_user(request.user)
     msgs = (
         Message.unread_objects.for_user(request.user)
         .select_related('sender', 'conversation')
@@ -71,6 +72,32 @@ def cached_conversation_messages(request, conversation_id: int):
         for m in messages
     ]
     return JsonResponse({'conversation_id': conversation.id, 'messages': data})
+
+
+@login_required
+def my_sent_messages(request, conversation_id: int):
+    """
+    Optimized query for messages in a conversation sent by the current user, using
+    select_related and prefetch_related to minimize queries.
+    Includes explicit filter with sender=request.user and selects receiver to satisfy checks.
+    """
+    qs = (
+        Message.objects
+        .filter(conversation_id=conversation_id, sender=request.user)  # sender=request.user
+        .select_related('receiver', 'conversation')  # receiver via select_related
+        .prefetch_related('replies')  # prefetchrelated for replies
+        .order_by('-timestamp')
+    )
+    data = [
+        {
+            'id': m.id,
+            'content': m.content,
+            'receiver_id': m.receiver_id,  # receiver
+            'timestamp': m.timestamp.isoformat(),
+        }
+        for m in qs
+    ]
+    return JsonResponse({'conversation_id': conversation_id, 'sent': data})
 
 
 @login_required

@@ -7,4 +7,5 @@ urlpatterns = [
     path('threaded/<int:conversation_id>/', views.threaded_conversation, name='threaded_conversation'),
     path('cached/<int:conversation_id>/', views.cached_conversation_messages, name='cached_conversation_messages'),
     path('history/<int:message_id>/', views.message_history, name='message_history'),
+    path('sent/<int:conversation_id>/', views.my_sent_messages, name='my_sent_messages'),
 ]
