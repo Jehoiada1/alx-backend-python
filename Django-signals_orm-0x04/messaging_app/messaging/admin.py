@@ -2,6 +2,11 @@ from django.contrib import admin
 from .models import Conversation, Message, MessageHistory, Notification
 
 
+class MessageHistoryInline(admin.TabularInline):
+    model = MessageHistory
+    extra = 0
+
+
 @admin.register(Conversation)
 class ConversationAdmin(admin.ModelAdmin):
     list_display = ("id", "created_at")
@@ -10,14 +15,15 @@ class ConversationAdmin(admin.ModelAdmin):
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ("id", "conversation", "sender", "receiver", "timestamp", "edited", "read")
-    list_filter = ("edited", "read", "timestamp")
+    list_display = ("id", "conversation", "sender", "receiver", "timestamp", "edited", "unread")
+    list_filter = ("edited", "unread", "timestamp")
     search_fields = ("content",)
+    inlines = [MessageHistoryInline]
 
 
 @admin.register(MessageHistory)
 class MessageHistoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "message", "edited_at")
+    list_display = ("id", "message", "edited_at", "edited_by")
 
 
 @admin.register(Notification)
