@@ -237,3 +237,4 @@ class MessageViewSet(viewsets.ModelViewSet):
         
         serializer = MessageListSerializer(messages, many=True)
         return Response(serializer.data)
+
