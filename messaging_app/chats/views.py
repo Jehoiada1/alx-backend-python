@@ -2,7 +2,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend  # Using django-filters
 from .permissions import IsParticipantOfConversation
 from .filters import MessageFilter
 from django.db.models import Q
@@ -174,7 +174,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     lookup_field = 'message_id'
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_class = MessageFilter
+    filterset_class = MessageFilter  # Add filtering class MessageFilter to retrieve messages within a time range or by sender/conversation
     search_fields = ['message_body', 'sender__email', 'conversation__conversation_id']
     ordering_fields = ['sent_at']
 
