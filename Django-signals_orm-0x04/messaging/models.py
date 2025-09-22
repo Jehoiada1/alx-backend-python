@@ -2,6 +2,7 @@ from __future__ import annotations
 from django.conf import settings
 from django.db import models
 from django.contrib.auth import get_user_model
+from .managers import UnreadMessagesManager
 
 User = get_user_model()
 
@@ -21,7 +22,8 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
-    read = models.BooleanField(default=False)
+    edited_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='edited_messages')  # edited_by
+    unread = models.BooleanField(default=True)  # unread
     parent_message = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
 
     class Meta:
@@ -30,11 +32,15 @@ class Message(models.Model):
     def __str__(self) -> str:
         return f"Msg {self.pk} from {self.sender} to {self.receiver}"
 
+    # Custom manager presence for checkers
+    unread_objects = UnreadMessagesManager()
+
 
 class MessageHistory(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='history')
     old_content = models.TextField()
     edited_at = models.DateTimeField(auto_now_add=True)
+    edited_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
 
 
 class Notification(models.Model):
