@@ -16,7 +16,7 @@ def delete_user(request):
 def unread_inbox(request):
     # Use UnreadMessagesManager and .only() to optimize fields
     msgs = (
-        Message.objects.filter(conversation__participants=request.user, unread=True)
+        Message.unread_objects.for_user(request.user)
         .select_related('sender', 'conversation')
         .only('id', 'content', 'timestamp', 'conversation__id', 'sender__id')
         .order_by('-timestamp')
@@ -71,3 +71,19 @@ def cached_conversation_messages(request, conversation_id: int):
         for m in messages
     ]
     return JsonResponse({'conversation_id': conversation.id, 'messages': data})
+
+
+@login_required
+def message_history(request, message_id: int):
+    # Display the message edit history in the user interface
+    msg = get_object_or_404(Message, pk=message_id, conversation__participants=request.user)
+    history = msg.history.all().order_by('-edited_at').select_related('edited_by')
+    data = [
+        {
+            'old_content': h.old_content,
+            'edited_at': h.edited_at.isoformat(),
+            'edited_by': getattr(h.edited_by, 'id', None),
+        }
+        for h in history
+    ]
+    return JsonResponse({'message_id': msg.id, 'history': data})
