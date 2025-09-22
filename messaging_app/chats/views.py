@@ -2,6 +2,9 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from .permissions import IsParticipantOfConversation
+from .filters import MessageFilter
 from django.db.models import Q
 from .models import User, Conversation, Message
 from .serializers import (
@@ -48,9 +51,9 @@ class ConversationViewSet(viewsets.ModelViewSet):
     Provides CRUD operations and custom actions for Conversation model.
     """
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     lookup_field = 'conversation_id'
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['participants__email', 'participants__first_name', 'participants__last_name']
     ordering_fields = ['created_at']
 
@@ -168,9 +171,10 @@ class MessageViewSet(viewsets.ModelViewSet):
     Provides CRUD operations for Message model.
     """
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     lookup_field = 'message_id'
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = MessageFilter
     search_fields = ['message_body', 'sender__email', 'conversation__conversation_id']
     ordering_fields = ['sent_at']
 

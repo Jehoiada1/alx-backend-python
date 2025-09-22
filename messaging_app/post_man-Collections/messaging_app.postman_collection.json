@@ -1,0 +1,46 @@
+{
+  "info": {
+    "name": "messaging_app API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Obtain Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "url": {"raw": "http://localhost:8000/api/token/", "host": ["http://localhost:8000"], "path": ["api", "token", ""]},
+        "body": {"mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"pass123\"\n}"}
+      }
+    },
+    {
+      "name": "Refresh Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "url": {"raw": "http://localhost:8000/api/token/refresh/", "host": ["http://localhost:8000"], "path": ["api", "token", "refresh", ""]},
+        "body": {"mode": "raw", "raw": "{\n  \"refresh\": \"<refresh-token>\"\n}"}
+      }
+    },
+    {
+      "name": "List Conversations",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "http://localhost:8000/api/conversations/", "host": ["http://localhost:8000"], "path": ["api", "conversations", ""]},
+        "header": [{"key": "Authorization", "value": "Bearer <access-token>"}]
+      }
+    },
+    {
+      "name": "List Messages",
+      "request": {
+        "method": "GET",
+        "url": {"raw": "http://localhost:8000/api/messages/?conversation=<conversation_id>", "host": ["http://localhost:8000"], "path": ["api", "messages", ""], "query": [{"key": "conversation", "value": "<conversation_id>"}]},
+        "header": [{"key": "Authorization", "value": "Bearer <access-token>"}]
+      }
+    }
+  ]
+}
