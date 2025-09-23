@@ -1,59 +1,59 @@
 # alx-backend-python
 
-## Messaging App CI/CD Overview
+## Overview
 
-This repository contains a Django REST messaging application with a full CI/CD toolchain:
+This repository aggregates Python backend learning exercises (testing, async operations, decorators, generators, etc.) plus a Django REST messaging application (`messaging_app`).
 
-### Jenkins (Pipeline as Code)
-Primary pipeline file: `messaging_app/Jenkinsfile`
+Previously this project contained extensive CI/CD automation (multiple Jenkins pipelines and GitHub Actions workflows). All of those automation files have now been intentionally removed as part of a cleanup/reset request. The application and supporting code remain runnable locally.
 
-Stages:
-1. Checkout (Git with `credentialsId`)
-2. Install (pip dependencies + pytest + flake8 + coverage tooling)
-3. Test (Django checks, migrations, pytest producing `reports/junit.xml` + coverage XML, flake8)
-4. Docker Build & Push (tags image with build number and `latest`, conditional push if Docker Hub creds provided)
+## Messaging App: Run Locally
 
-Fallback / detection aides:
-* Root `Jenkinsfile` (minimal version for simplistic scanners)
-* `messaging_app/pipeline.groovy` and `messaging_app/Jenkinsfile.min` (extra minimal pipelines for naive auto-checkers)
+Prerequisites: Python 3.10+ and a local/accessible MySQL instance if you want to mirror production-style settings (or you can point Django to SQLite for quick exploration).
 
-### GitHub Actions
-Workflows (scoped under `messaging_app/.github/workflows/`):
-* `ci.yml` – Runs MySQL-backed tests, migrations, lint (flake8), coverage, and uploads JUnit + coverage artifacts.
-* `dep.yml` / `dep.yaml` – Builds and (if secrets available) pushes Docker image to Docker Hub.
-
-Secrets required for Docker push:
-* `DOCKERHUB_USERNAME`
-* `DOCKERHUB_TOKEN`
-
-### Tests
-At least one guaranteed test: `messaging_app/chats/test_smoke.py` so CI always emits a JUnit report even if application-specific tests are minimal.
-
-### Running Locally (Without Docker)
+### Quick Start (SQLite for simplicity)
 ```
 cd messaging_app
-python -m pip install -r requirements.txt pytest flake8
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+set DJANGO_DEBUG=True
 python manage.py migrate --noinput
 python manage.py runserver 0.0.0.0:8000
 ```
 
-### Docker
+### Running Tests
 ```
 cd messaging_app
-docker build -t messaging_app .
-docker run --rm -p 8000:8000 messaging_app
+python -m pip install pytest pytest-cov
+pytest -q
 ```
 
-### Docker Compose (MySQL)
+### Using MySQL (Optional)
+1. Create a database and user.
+2. Copy `.env.example` to `.env` and fill in credentials.
+3. Install MySQL client build deps (on Linux: `apt-get install default-libmysqlclient-dev build-essential`).
+4. Run migrations and start the server.
+
+### Docker (If you still want a container image)
+The Docker-related automation was removed, but you can still build manually:
 ```
 cd messaging_app
-cp .env.example .env
-docker compose up --build
+docker build -t messaging_app:local .
+docker run --rm -p 8000:8000 messaging_app:local
 ```
 
-### Notes
-* Fallback import logic in `chats/urls.py` prevents failures if optional nested router dependency is absent.
-* Multiple pipeline files exist intentionally to satisfy strict academic automated checkers that look for different patterns.
+## Notes
+* Optional nested router dependency is handled with a fallback import so the app runs even if `drf-nested-routers` is absent.
+* CI/CD artifacts (Jenkinsfiles, GitHub workflow YAMLs) were deleted intentionally; reintroduce them later if automation is needed again.
+
+## Structure Highlights
+* `python-generators-0x00/` – Generator pattern exercises
+* `python-decorators-0x01/` – Decorator utilities (logging, retry, caching, transactions)
+* `python-context-async-perations-0x02/` – Async/context manager examples
+* `0x03-Unittests_and_integration_tests/` – Unit & integration test examples
+* `messaging_app/` – Django REST messaging service
+
+## Restoring Automation (Future Idea)
+If you need CI/CD again, add either a minimal Jenkinsfile at `messaging_app/Jenkinsfile` or a GitHub Actions workflow under `.github/workflows/ci.yml` that installs dependencies and runs `pytest` producing JUnit/coverage reports.
 
 ---
-If an automated checker still reports missing pipeline files, ensure it is pointing to branch `main` or `master` and refresh the submission after the latest commit.
+Cleanup complete: pipelines and workflows removed as requested.
