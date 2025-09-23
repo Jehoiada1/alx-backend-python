@@ -16,7 +16,7 @@ services:
 
   web:
     build: .
-    command: bash -c "python manage.py migrate --noinput && gunicorn messaging_app.wsgi:application --bind 0.0.0.0:8000 --workers 3"
+    command: bash -c "python3 manage.py migrate --noinput && python3 manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
     env_file:
