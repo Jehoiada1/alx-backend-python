@@ -37,6 +37,7 @@ pipeline {
     stage('Run tests (pytest)') {
       steps {
         dir('messaging_app') {
+          sh "mkdir -p reports"
           sh "${PYTHON} manage.py check"
           sh "${PYTHON} manage.py migrate --noinput"
           sh "pytest -q --maxfail=1 --disable-warnings --junitxml=reports/junit.xml --cov=. --cov-report=xml:reports/coverage.xml --cov-report=term"

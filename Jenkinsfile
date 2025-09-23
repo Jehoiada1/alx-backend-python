@@ -39,6 +39,7 @@ pipeline {
     stage('Run tests (pytest)') {
       steps {
         dir('messaging_app') {
+          sh "mkdir -p reports"
           sh "${PYTHON} manage.py check"
           sh "${PYTHON} manage.py migrate --noinput"
           sh "pytest -q --maxfail=1 --disable-warnings --junitxml=reports/junit.xml --cov=. --cov-report=xml:reports/coverage.xml --cov-report=term"
@@ -92,6 +93,7 @@ pipeline {
         dir('messaging_app') {
           sh "${PYTHON} -m pip install --upgrade pip"
           sh "${PYTHON} -m pip install -r requirements.txt pytest pytest-cov flake8"
+          sh "mkdir -p reports"
           sh "${PYTHON} manage.py check"
           sh "${PYTHON} manage.py migrate --noinput"
           sh "pytest -q --maxfail=1 --disable-warnings --junitxml=reports/junit.xml --cov=. --cov-report=xml:reports/coverage.xml"
