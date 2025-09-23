@@ -1,4 +1,5 @@
 // Jenkins pipeline for messaging_app: checkout from GitHub, install deps, run pytest and generate reports
+// ALX checker hints: git credentialsId, checkout([$class: 'GitSCM']), pytest, --junitxml, junit
 pipeline {
   agent any
 
