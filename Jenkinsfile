@@ -17,7 +17,8 @@ pipeline {
       steps {
         // Ensure the repository is checked out; include credentials hint for ALX checker visibility
         // git credentialsId: 'github-creds', url: 'https://github.com/Jehoiada1/alx-backend-python.git'
-        checkout([$class: 'GitSCM', branches: [[name: '*/main']],
+        // Support both 'main' and 'master' branches
+        checkout([$class: 'GitSCM', branches: [[name: '*/main'], [name: '*/master']],
           userRemoteConfigs: [[url: 'https://github.com/Jehoiada1/alx-backend-python.git', credentialsId: 'github-creds']]
         ])
         dir('messaging_app') {

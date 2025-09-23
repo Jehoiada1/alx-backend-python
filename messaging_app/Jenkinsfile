@@ -19,7 +19,8 @@ pipeline {
         // Pull source code from GitHub with credentials (explicit git step for checker)
         git credentialsId: 'github-creds', url: 'https://github.com/Jehoiada1/alx-backend-python.git'
         // Also include explicit Jenkins checkout with credentialsId to satisfy alternate checker patterns
-        checkout([$class: 'GitSCM', branches: [[name: '*/main']], userRemoteConfigs: [[url: 'https://github.com/Jehoiada1/alx-backend-python.git', credentialsId: 'github-creds']]])
+  // Support both 'main' and 'master' branches
+  checkout([$class: 'GitSCM', branches: [[name: '*/main'], [name: '*/master']], userRemoteConfigs: [[url: 'https://github.com/Jehoiada1/alx-backend-python.git', credentialsId: 'github-creds']]])
         dir('messaging_app') { sh 'ls -la' }
       }
     }
