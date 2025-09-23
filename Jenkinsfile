@@ -5,6 +5,7 @@ pipeline {
   environment {
     DOCKER_IMAGE = 'your-dockerhub-username/messaging_app'
     PYTHON = 'python3'
+    IMAGE_TAG = "${env.BUILD_NUMBER ?: 'local'}"
   }
 
   options {
@@ -57,7 +58,7 @@ pipeline {
     stage('Build Docker image') {
       steps {
         dir('messaging_app') {
-          sh "docker build -t ${DOCKER_IMAGE}:latest ."
+          sh "docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} -t ${DOCKER_IMAGE}:latest ."
         }
       }
     }
@@ -67,6 +68,7 @@ pipeline {
       steps {
         withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DH_USER', passwordVariable: 'DH_PASS')]) {
           sh 'echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin'
+          sh 'docker push ${DOCKER_IMAGE}:${IMAGE_TAG}'
           sh 'docker push ${DOCKER_IMAGE}:latest'
         }
       }
@@ -96,6 +98,7 @@ pipeline {
           sh "mkdir -p reports"
           sh "${PYTHON} manage.py check"
           sh "${PYTHON} manage.py migrate --noinput"
+          // Run pytest and generate JUnit report (requirement: run tests & generate report)
           sh "pytest -q --maxfail=1 --disable-warnings --junitxml=reports/junit.xml --cov=. --cov-report=xml:reports/coverage.xml"
           sh "flake8 ."
         }
