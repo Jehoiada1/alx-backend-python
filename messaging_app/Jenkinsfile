@@ -1,3 +1,4 @@
+// Jenkins pipeline for messaging_app: checkout from GitHub, install deps, run pytest and generate reports
 pipeline {
   agent any
 
