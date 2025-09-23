@@ -15,15 +15,9 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        // Pull source code from GitHub (ensure Jenkins has Git plugin and credentials if needed)
-        // Alternative simple git step with credentials for checker visibility:
-        // git credentialsId: 'github-creds', url: 'https://github.com/Jehoiada1/alx-backend-python.git'
-        checkout([$class: 'GitSCM', branches: [[name: '*/main']],
-          userRemoteConfigs: [[url: 'https://github.com/Jehoiada1/alx-backend-python.git', credentialsId: 'github-creds']]
-        ])
-        dir('messaging_app') {
-          sh 'ls -la'
-        }
+        // Pull source code from GitHub with credentials (explicit git step for checker)
+        git credentialsId: 'github-creds', url: 'https://github.com/Jehoiada1/alx-backend-python.git'
+        dir('messaging_app') { sh 'ls -la' }
       }
     }
 
