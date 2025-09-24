@@ -1,0 +1,2 @@
+# Task 3: Commands used to apply ingress
+kubectl apply -f ingress.yaml

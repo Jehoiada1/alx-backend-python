@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Task 0: Start local Kubernetes (Minikube) cluster and show basic info
+# Placement: inner messaging_app/messaging_app per spec (File: messaging_app/kurbeScript)
+set -euo pipefail
+
+echo "[kurbeScript] Checking for minikube..."
+if ! command -v minikube >/dev/null 2>&1; then
+  echo "ERROR: minikube not installed. Install it first: https://minikube.sigs.k8s.io/docs/start/" >&2
+  exit 1
+fi
+
+status=$(minikube status --output=json 2>/dev/null || true)
+if echo "$status" | grep -qi 'Running'; then
+  echo "[kurbeScript] Minikube already running."
+else
+  echo "[kurbeScript] Starting minikube..."
+  minikube start
+fi
+
+echo "[kurbeScript] Cluster info:"
+kubectl cluster-info || { echo "kubectl cannot reach cluster" >&2; exit 1; }
+
+echo "[kurbeScript] Listing all pods (all namespaces):"
+kubectl get pods -A -o wide || true
+
+echo "[kurbeScript] Done."

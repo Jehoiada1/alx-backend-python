@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Task 2: Scale deployment to 3 replicas and perform basic load & resource checks (inner)
+set -euo pipefail
+
+DEPLOYMENT=messaging-app-deployment
+SERVICE=messaging-app
+
+echo "[kubctl-0x01] Ensuring deployment exists (applying base deployment if needed)..."
+if ! kubectl get deployment "$DEPLOYMENT" >/dev/null 2>&1; then
+  if [ -f deployment.yaml ]; then
+    kubectl apply -f deployment.yaml
+  else
+    echo "deployment.yaml not found in $(pwd)" >&2
+    exit 1
+  fi
+fi
+
+echo "[kubctl-0x01] Scaling to 3 replicas..."
+kubectl scale deployment "$DEPLOYMENT" --replicas=3
+
+echo "[kubctl-0x01] Waiting for replicas to become available..."
+kubectl rollout status deployment "$DEPLOYMENT"
+
+echo "[kubctl-0x01] Current pods:"
+kubectl get pods -l app=messaging-app -o wide
+
+echo "[kubctl-0x01] Starting temporary port-forward (background) for load test (8000)..."
+kubectl port-forward svc/${SERVICE} 8000:8000 >/dev/null 2>&1 &
+PF_PID=$!
+sleep 3
+
+cleanup() { echo "[kubctl-0x01] Cleaning up port-forward"; kill $PF_PID >/dev/null 2>&1 || true; }
+trap cleanup EXIT
+
+TARGET=http://127.0.0.1:8000/
+
+if command -v wrk >/dev/null 2>&1; then
+  echo "[kubctl-0x01] Running wrk load test (15s)..."
+  wrk -t2 -c20 -d15s "$TARGET" || true
+else
+  echo "[kubctl-0x01] wrk not installed; performing curl loop instead..."
+  for i in $(seq 1 20); do
+    code=$(curl -s -o /dev/null -w '%{http_code}' "$TARGET" || echo '000')
+    echo "curl attempt $i -> HTTP $code"
+    sleep 0.5
+  done
+fi
+
+echo "[kubctl-0x01] Attempting resource usage (kubectl top pods)..."
+if kubectl top pods >/dev/null 2>&1; then
+  kubectl top pods -l app=messaging-app || true
+else
+  echo "Metrics server not installed; skipping kubectl top." >&2
+fi
+
+echo "[kubctl-0x01] Done."

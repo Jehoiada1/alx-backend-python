@@ -1,0 +1,38 @@
+# Task 5 reference copy (inner) with image 2.0 for rolling update
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messaging-app-deployment
+  labels:
+    app: messaging-app
+    color: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: messaging-app
+      color: blue
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: messaging-app
+        color: blue
+    spec:
+      containers:
+        - name: messaging-app
+          image: your-dockerhub-username/messaging_app:2.0
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet: { path: /, port: 8000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /, port: 8000 }
+            initialDelaySeconds: 30
+            periodSeconds: 30

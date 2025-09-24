@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Task 4: Apply blue & green deployments, create/update service, check green logs, optionally switch
+set -euo pipefail
+
+echo "[kubctl-0x02] Applying blue & green deployments and service..."
+kubectl apply -f blue_deployment.yaml
+kubectl apply -f green_deployment.yaml
+kubectl apply -f kubeservice.yaml
+
+echo "[kubctl-0x02] Waiting for blue deployment ready..."
+kubectl rollout status deployment/messaging-app-deployment-blue
+echo "[kubctl-0x02] Waiting for green deployment ready..."
+kubectl rollout status deployment/messaging-app-deployment-green
+
+GREEN_POD=$(kubectl get pods -l app=messaging-app,color=green -o name | head -n1)
+if [ -n "${GREEN_POD}" ]; then
+  echo "[kubctl-0x02] Logs (first green pod): $GREEN_POD"
+  kubectl logs "$GREEN_POD" --tail=40 || true
+fi
+
+echo "[kubctl-0x02] (Optional) Switching service selector to green..."
+kubectl patch service messaging-app -p '{"spec":{"selector":{"app":"messaging-app","color":"green"}}}'
+
+echo "[kubctl-0x02] Service now points to:"
+kubectl get svc messaging-app -o yaml | grep -A4 selector
+
+echo "[kubctl-0x02] Blue/Green rollout script complete."

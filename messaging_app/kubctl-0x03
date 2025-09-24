@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Task 5: Rolling update using inner blue_deployment.yaml (image 2.0)
+set -euo pipefail
+
+INNER_BLUE=messaging_app/blue_deployment.yaml
+DEPLOY_NAME=messaging-app-deployment
+
+if [ ! -f "$INNER_BLUE" ]; then
+  echo "Expected inner file $INNER_BLUE not found" >&2
+  exit 1
+fi
+
+echo "[kubctl-0x03] Applying updated (image 2.0) deployment..."
+kubectl apply -f "$INNER_BLUE"
+
+echo "[kubctl-0x03] Monitoring rollout status..."
+kubectl rollout status deployment/$DEPLOY_NAME
+
+echo "[kubctl-0x03] Performing simple availability probe during rollout (curl loop)..."
+SERVICE=messaging-app
+kubectl port-forward svc/${SERVICE} 8000:8000 >/dev/null 2>&1 &
+PF_PID=$!
+trap 'kill $PF_PID 2>/dev/null || true' EXIT
+for i in $(seq 1 20); do
+  code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/ || echo '000')
+  echo "Attempt $i -> HTTP $code"
+  sleep 1
+done
+
+echo "[kubctl-0x03] Current pods:"
+kubectl get pods -l app=messaging-app -o wide
+
+echo "[kubctl-0x03] Done." 

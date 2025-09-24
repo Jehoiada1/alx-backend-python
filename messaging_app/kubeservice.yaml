@@ -1,0 +1,16 @@
+# Task 4: Service that can switch between blue/green by selector patch
+apiVersion: v1
+kind: Service
+metadata:
+  name: messaging-app
+  labels:
+    app: messaging-app
+spec:
+  type: ClusterIP
+  selector:
+    app: messaging-app
+    color: blue  # initial traffic to blue version
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
