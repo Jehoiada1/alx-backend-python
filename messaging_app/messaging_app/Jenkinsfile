@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    environment {
+        PYTHON_HOME = '/usr/local/bin/python3'  // Adjust this if necessary
+        PIP_HOME = '/usr/local/bin/pip3'        // Adjust this if necessary
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                // Checkout the code from GitHub using credentialsId and specify branch
+                git credentialsId: 'github-credentials', url: 'https://github.com/mosekyle/alx-backend-python.git', git branch: 'main'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    // Install dependencies from requirements.txt
+                    sh 'pip3 install -r messaging_app/requirements.txt'
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Run tests using pytest
+                    sh 'pytest --maxfail=1 --disable-warnings -q'
+                }
+            }
+        }
+
+        stage('Generate Test Report') {
+            steps {
+                script {
+                    // Generate the test report after running pytest
+                    sh 'pytest --maxfail=1 --disable-warnings -q --junitxml=test_report.xml'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Archive test results for future reference
+            junit '**/test_report.xml'
+        }
+    }
+}
