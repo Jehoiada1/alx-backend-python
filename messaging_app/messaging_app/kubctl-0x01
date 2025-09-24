@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Scale the deployment to 3 replicas
+echo "Scaling deployment to 3 replicas..."
+kubectl scale deployment django-messaging-app --replicas=3
+
+# Wait for scaling to complete
+echo "Waiting for pods to be ready..."
+sleep 30
+
+# Verify pods are running
+echo "Checking pod status..."
+kubectl get pods
+
+# Monitor resource usage
+echo "Monitoring resource usage..."
+kubectl top pods
+
+# Load testing using wrk (make sure wrk is installed)
+echo "Performing load testing..."
+wrk -t12 -c400 -d30s http://localhost:8000
+
+echo "Scaling operations complete!"
