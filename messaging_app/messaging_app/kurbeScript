@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Check if minikube is installed
+if ! command -v minikube &> /dev/null; then
+    echo "Error: minikube is not installed. Please install minikube first."
+    echo "Visit https://minikube.sigs.k8s.io/docs/start/ for installation instructions"
+    exit 1
+fi
+
+# Check if kubectl is installed
+if ! command -v kubectl &> /dev/null; then
+    echo "Error: kubectl is not installed. Please install kubectl first."
+    echo "Visit https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/ for installation instructions"
+    exit 1
+fi
+
+# Start minikube cluster with docker driver
+echo "Starting Kubernetes cluster..."
+minikube start --driver=docker
+
+# Wait for cluster to be ready
+echo "Waiting for cluster to be ready..."
+sleep 20
+
+# Check cluster info
+echo "Checking cluster info..."
+kubectl cluster-info
+
+# Get all pods in all namespaces
+echo "Retrieving available pods..."
+kubectl get pods --all-namespaces
+
+# Display cluster status
+echo "Cluster status:"
+minikube status
+
+echo "Script completed. Your Kubernetes cluster should now be running."
