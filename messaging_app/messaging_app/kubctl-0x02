@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Function to check deployment status
+check_deployment() {
+    local deploy_name=$1
+    echo "Checking deployment status for $deploy_name..."
+    kubectl rollout status deployment/$deploy_name
+}
+
+# Function to check logs for errors
+check_logs() {
+    local version=$1
+    echo "Checking logs for version $version..."
+    kubectl logs -l version=$version --tail=50
+}
+
+# Deploy blue version first
+echo "Deploying blue version..."
+kubectl apply -f blue_deployment.yaml
+check_deployment "django-messaging-blue"
+
+# Apply service (pointing to blue version)
+echo "Creating service pointing to blue version..."
+kubectl apply -f kubeservice.yaml
+
+# Wait for blue version to be ready
+echo "Waiting for blue version to be stable..."
+sleep 30
+
+# Deploy green version
+echo "Deploying green version..."
+kubectl apply -f green_deployment.yaml
+check_deployment "django-messaging-green"
+
+# Check logs for both versions
+echo "Checking deployment logs..."
+check_logs "blue"
+check_logs "green"
+
+# To switch traffic to green version, update service selector
+echo "To switch traffic to green version, run:"
+echo "kubectl patch service django-messaging-service -p '{\"spec\":{\"selector\":{\"version\":\"green\"}}}'"
+
+echo "Blue-Green deployment completed successfully!"
