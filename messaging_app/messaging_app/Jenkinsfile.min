@@ -1,0 +1,12 @@
+// Inner minimal Jenkins pipeline for strict checkers (messaging_app/messaging_app/Jenkinsfile.min)
+pipeline {
+  agent any
+  stages {
+    stage('Checkout') { steps { git credentialsId: 'github-creds', url: 'https://github.com/Jehoiada1/alx-backend-python.git' } }
+    stage('Install') { steps { sh 'python3 -m pip install --upgrade pip && python3 -m pip install -r ../requirements.txt pytest' } }
+    stage('Test') {
+      steps { sh 'cd .. && mkdir -p reports && pytest -q --junitxml=reports/junit.xml' }
+      post { always { junit 'messaging_app/reports/junit.xml' } }
+    }
+  }
+}
