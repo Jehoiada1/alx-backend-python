@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-messaging-blue
+  labels:
+    app: django-messaging
+    version: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: django-messaging
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: django-messaging
+        version: blue
+    spec:
+      containers:
+      - name: django-app
+        image: messaging_app  # Updated to version 2.0
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:     # Added to ensure proper rolling update
+          httpGet:
+            path: /health   # Assuming you have a health check endpoint
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
