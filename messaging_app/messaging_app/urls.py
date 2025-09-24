@@ -16,9 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 from chats.auth import TokenObtainPairView, TokenRefreshView
 
+
+def health(request):
+    """Lightweight health check endpoint for K8s probes.
+
+    Returns 200 immediately without hitting the database so pods
+    become Ready quickly. Extend with deeper checks if needed.
+    """
+    return JsonResponse({"status": "ok"})
+
 urlpatterns = [
+    path('', health, name='root_health'),  # root for convenience
+    path('healthz/', health, name='healthz'),
     path('admin/', admin.site.urls),
     path('api/', include('chats.urls')),
     path('api-auth/', include('rest_framework.urls')),
