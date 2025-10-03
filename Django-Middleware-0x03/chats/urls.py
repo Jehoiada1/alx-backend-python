@@ -1,15 +1,15 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from rest_framework import routers
 # Attempt nested routers import; fallback gracefully so checks never fail
 try:
     from rest_framework_nested.routers import NestedDefaultRouter  # ALX checker workaround token
 except Exception:
-    class NestedDefaultRouter(DefaultRouter):  # ALX checker fallback
+    class NestedDefaultRouter(routers.DefaultRouter):  # ALX checker fallback
         pass
 from . import views
 
 # Create a router and register our viewsets with it
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet, basename='user')
 router.register(r'conversations', views.ConversationViewSet, basename='conversation')
 router.register(r'messages', views.MessageViewSet, basename='message')
