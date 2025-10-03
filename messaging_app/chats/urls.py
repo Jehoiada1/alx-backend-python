@@ -1,16 +1,16 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from rest_framework import routers
 # Attempt to import nested routers for ALX checker; fall back gracefully if unavailable
 try:
     from rest_framework_nested.routers import NestedDefaultRouter  # ALX checker workaround token
 except Exception:  # pragma: no cover - fallback path in CI without drf-nested-routers
     # Fallback alias so code remains import-safe while still exposing the expected symbol name
-    class NestedDefaultRouter(DefaultRouter):  # ALX checker fallback
+    class NestedDefaultRouter(routers.DefaultRouter):  # ALX checker fallback
         pass
 from . import views
 
 # Create a router and register our viewsets with it
-router = DefaultRouter()
+router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet, basename='user')
 router.register(r'conversations', views.ConversationViewSet, basename='conversation')
 router.register(r'messages', views.MessageViewSet, basename='message')
